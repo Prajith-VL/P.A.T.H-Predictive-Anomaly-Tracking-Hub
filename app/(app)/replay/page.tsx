@@ -45,7 +45,7 @@ export default function RouteReplayPage() {
 
       {/* Map Area */}
       <div className="relative h-[40vh] border-b">
-        <MockMap mode="demo_complete" progress={1} />
+        <MockMap riskLevel="low" progress={1} />
         {/* Animated Map overlay to simulate replay drawing */}
         <motion.div 
           className="absolute inset-0 bg-background/20 backdrop-blur-[1px] pointer-events-none"
