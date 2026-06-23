@@ -185,5 +185,102 @@ Built with a mission to make every journey safer.
 
 ### PATH — Your Journey. Verified.
 
+---
+
+# 🛠️ Prototype — Quick Start (Developer Guide)
+
+This repository ships a **fully self-contained, runnable prototype** of the PATH
+User Demo Flow described in PRD §20. No backend, no API keys — it runs with
+two commands.
+
+## Run locally
+
+```bash
+npm install
+npm run dev      # http://localhost:3000
+```
+
+Build / type-check:
+
+```bash
+npm run build    # production build (17 routes prerender)
+```
+
+> Requires Node 18.18+ (Node 20+ recommended).
+
+## Tech stack (as implemented)
+
+| Layer | Choice | Notes |
+|-------|--------|-------|
+| Framework | **Next.js 15** (App Router) | Static-prerendered, RSC |
+| Language | **TypeScript** (strict) | Full domain type system |
+| Styling | **Tailwind CSS** + shadcn/ui tokens | Light & dark mode |
+| Animation | **motion/react** | Staggered hero, scan-line, cascade |
+| Icons | **lucide-react** | Per UI reference PDF |
+| State | **Zustand** + `persist` | localStorage refresh-safety |
+| Maps | **Custom SVG mock map** | No API key needed |
+| Notifications | **Sonner** | AI alert toasts |
+
+## Screens → PRD mapping
+
+| Route | PRD ref | Implements |
+|-------|---------|------------|
+| `/` | §1–8 | Landing: hero, 8 features, 3 personas |
+| `/login` | §9 | Google login + Guest Demo Login (mock) |
+| `/dashboard` | §11.1–3 | Quick actions + safety summary |
+| `/scan` | §7.2 / Feat 1 | QR scanner with scan animation → driver |
+| `/driver/[id]` | §7.3–4 / Feat 6 | Profile + Trust Score ring + verification checklist |
+| `/ride` | §7.6 / Feat 2,5,6 | Active ride: mock map, live tick, AI alerts, SOS |
+| `/sos` | §8 Feat 4 / §15 R4 | Full SOS cascade: contacts → dashboard → police → location |
+| `/ride/complete` | §7.7–8 | Summary + star rating + feedback |
+| `/replay` | §8 Feat 7 | Route replay of completed ride |
+| `/contacts` | §8 Feat 3 | Manage up to 3 trusted contacts |
+| `/profile` | §11.1.10 | User profile |
+| `/admin*` | §8 Feat 8 | Admin dashboard, drivers, rides, alerts |
+
+## Simulated AI Safety Engine (PRD §15)
+
+All four rules run client-side on a scripted timeline during `/ride`:
+
+| Rule | Trigger | Risk | Implementation |
+|------|---------|------|----------------|
+| 1 | Route deviation > 500m | Medium | Fires at ~42% progress (`store.ts`) |
+| 2 | Vehicle stationary > 5 min | Medium | Fires at ~66% progress |
+| 3 | Trip duration > 20% expected | Medium | Fires at ~82% progress |
+| 4 | SOS triggered | **High** | `/sos` page sets `riskLevel = high` |
+
+Risk escalation: any medium alert → ride HUD turns amber; SOS → red.
+
+## Project structure
+
+```
+app/                      # Next.js App Router pages
+  (app)/                  # Authenticated group (AppShell + BottomNav)
+    dashboard/ scan/ driver/[id]/ ride/ ride/complete/ replay/ contacts/ profile/ sos/
+  admin/                  # Admin section
+  login/                  # Auth
+app/page.tsx              # Landing
+lib/
+  store.ts                # Zustand store + AI rule engine
+  data.ts                 # Mock drivers, contacts, route polyline
+  types.ts                # Domain types (PRD §12 schema)
+  utils.ts                # cn(), formatters
+components/
+  ui/                     # 11 shadcn primitives (button, card, badge, …)
+  brand/                  # MockMap, RideSimulator, SOSButton, TrustScoreRing, …
+```
+
+## Demo Flow walkthrough (PRD §20)
+
+1. Open `/` → **Try Demo**
+2. `/login` → **Guest Demo Login**
+3. `/dashboard` → **Scan QR**
+4. `/scan` → tap **Start Scanning** → driver resolves
+5. `/driver/[id]` → review Trust Score → **Start Ride**
+6. `/ride` → watch the marker advance; AI alerts fire at thresholds
+7. tap **SOS** → `/sos` runs the 4-action cascade
+8. **End Ride** → `/ride/complete` → rate driver
+9. `/replay` → review the route
+
 ```
 ```
